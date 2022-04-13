@@ -6,7 +6,6 @@ import {AppComponent} from './app.component';
 import {NgxsModule} from "@ngxs/store";
 import {AppState} from "./state/app.state";
 import {MinefieldModule} from "./minefield/minefield.module";
-import {MinefieldState} from "./minefield/state/minefield.state";
 
 @NgModule({
   declarations: [
@@ -15,7 +14,7 @@ import {MinefieldState} from "./minefield/state/minefield.state";
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgxsModule.forRoot([AppState, MinefieldState]),
+    NgxsModule.forRoot([AppState]),
     MinefieldModule
   ],
   providers: [],

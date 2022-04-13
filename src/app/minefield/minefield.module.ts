@@ -1,9 +1,9 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MinefieldComponent } from './minefield/minefield.component';
-import { CellComponent } from './cell/cell.component';
-
-
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MinefieldComponent} from './minefield/minefield.component';
+import {CellComponent} from './cell/cell.component';
+import {NgxsModule} from "@ngxs/store";
+import {MinefieldState} from "./state/minefield.state";
 
 @NgModule({
   declarations: [
@@ -14,7 +14,9 @@ import { CellComponent } from './cell/cell.component';
     MinefieldComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    NgxsModule.forFeature([MinefieldState])
   ]
 })
-export class MinefieldModule { }
+export class MinefieldModule {
+}

@@ -1,0 +1,14 @@
+:host {
+  background-color: grey;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.opened {
+    background-color: pink;
+  }
+
+  &.mined {
+    background-color: red;
+  }
+}

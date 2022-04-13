@@ -1,0 +1,7 @@
+<ng-container *ngIf="minefield$ | async as minefield">
+  <ng-container *ngFor="let row of minefield">
+    <ng-container *ngFor="let cell of row">
+      <app-cell [cell]="cell"></app-cell>
+    </ng-container>
+  </ng-container>
+</ng-container>

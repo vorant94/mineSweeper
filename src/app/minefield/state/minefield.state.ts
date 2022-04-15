@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Action, Selector, State, StateContext} from '@ngxs/store';
-import {GenerateMinefieldWithSettings, OpenCell} from "./minefield.actions";
+import {DigCell, DisableMinefield, GenerateNewMinefield, RevealMinefield} from "./minefield.actions";
 import {MinefieldService} from "./minefield.service";
 import {MinefieldModel, MinefieldStateModel} from "./minefield.models";
 import {DEFAULTS} from "./minefield.defaults";
@@ -17,17 +17,29 @@ export class MinefieldState {
   }
 
   constructor(
-    private readonly service: MinefieldService
+    private readonly minefieldService: MinefieldService
   ) {
   }
 
-  @Action(GenerateMinefieldWithSettings)
-  generateMinefieldWithSettings(ctx: StateContext<MinefieldStateModel>, {settings}: GenerateMinefieldWithSettings): void {
+  @Action(GenerateNewMinefield)
+  generateNewMinefield(ctx: StateContext<MinefieldStateModel>, {settings}: GenerateNewMinefield): void {
+    const minefield: MinefieldModel = this.minefieldService.generateNewMinefield(settings);
 
-    const minefield: MinefieldModel = (() => {
-      const res: MinefieldModel = this.service.generateEmptyMinefield(settings);
+    ctx.setState({
+      minefield,
+      disabled: false,
+      disableReason: null
+    });
+  }
 
-      return this.service.fillMinefield(res, settings)
+  @Action(DigCell)
+  digCell(ctx: StateContext<MinefieldStateModel>, {id}: DigCell): void {
+    const minefield = (() => {
+      const {minefield} = ctx.getState();
+
+      const cell = this.minefieldService.getCellById(id, minefield);
+
+      return this.minefieldService.openCell(cell, minefield)
     })();
 
     ctx.patchState({
@@ -35,14 +47,20 @@ export class MinefieldState {
     });
   }
 
-  @Action(OpenCell)
-  openCell(ctx: StateContext<MinefieldStateModel>, {id}: OpenCell): void {
-    const state = ctx.getState();
+  @Action(DisableMinefield)
+  disableMinefield(ctx: StateContext<MinefieldStateModel>, {disableReason}: DisableMinefield): void {
+    ctx.patchState({
+      disabled: true,
+      disableReason
+    });
+  }
 
-    const minefield: MinefieldModel = (() => {
-      const cell = this.service.getCellById(id, state.minefield);
+  @Action(RevealMinefield)
+  revealMinefield(ctx: StateContext<MinefieldStateModel>): void {
+    const minefield = (() => {
+      const {minefield} = ctx.getState();
 
-      return this.service.openCell(cell, state.minefield)
+      return this.minefieldService.updateCells(() => ({isOpened: true}), minefield);
     })();
 
     ctx.patchState({

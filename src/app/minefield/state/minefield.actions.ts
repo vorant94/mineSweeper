@@ -1,16 +1,26 @@
-import {SettingsModel} from "../../state/app.models";
-import {CellModel} from "./minefield.models";
+import {DisableReason, MinefieldSettingsModel} from "../../shared/models";
 
-export class GenerateMinefieldWithSettings {
+export class GenerateNewMinefield {
   static readonly type = '[Minefield] Generate Minefield with Settings';
 
-  constructor(public settings: SettingsModel) {
+  constructor(public readonly settings: MinefieldSettingsModel) {
   }
 }
 
-export class OpenCell {
-  static readonly type = '[App] Open Cell';
+export class DigCell {
+  static readonly type = '[Minefield] Open Cell';
 
-  constructor(public readonly id: CellModel['id']) {
+  constructor(public readonly id: number) {
   }
+}
+
+export class DisableMinefield {
+  static readonly type = '[Minefield] Disable Minefield';
+
+  constructor(public readonly disableReason: DisableReason) {
+  }
+}
+
+export class RevealMinefield {
+  static readonly type = '[Minefield] Reveal Minefield';
 }

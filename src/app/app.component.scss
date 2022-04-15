@@ -1,0 +1,22 @@
+:host {
+  $gap-size: 1rem;
+
+  flex: 1;
+  padding: $gap-size;
+  display: flex;
+  flex-direction: column;
+  gap: $gap-size;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+}
+
+app-settings {
+  flex: 1;
+}
+
+app-minefield {
+  flex: 1;
+}

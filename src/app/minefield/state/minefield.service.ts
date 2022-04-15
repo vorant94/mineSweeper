@@ -1,13 +1,13 @@
 import {Injectable} from '@angular/core';
 import * as _ from "lodash";
-import { SettingsModel } from '../../state/app.models';
 import {CellModel, MinefieldModel} from './minefield.models';
+import {MinefieldSettingsModel} from "../../shared/models";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MinefieldService {
-  generateEmptyMinefield({rows, columns}: SettingsModel): MinefieldModel {
+  generateNewMinefield({rows, columns, minesCount}: MinefieldSettingsModel): MinefieldModel {
     //
     // generate first dimension with ids based on indexes
     //
@@ -24,7 +24,7 @@ export class MinefieldService {
     //
     // generate the second dimension with ids based on indexes multiplied by first dimension size
     //
-    const minefield = _.times(
+    let minefield: MinefieldModel = _.times(
       rows,
       (index) => _.cloneDeep(row)
         .map((minefieldCell) => ({
@@ -33,16 +33,12 @@ export class MinefieldService {
         }))
     );
 
-    return minefield;
-  }
-
-  fillMinefield(minefield: MinefieldModel, settings: SettingsModel): MinefieldModel {
     //
     // place mines
     //
-    let minesCount = 0;
-    while (minesCount < settings.minesCount) {
-      const id: CellModel['id'] = _.random(1, settings.rows * settings.columns);
+    let minesPlaced = 0;
+    while (minesPlaced < minesCount) {
+      const id: number = _.random(1, rows * columns);
 
       const cell = this.getCellById(id, minefield);
       if (cell.isMined) {
@@ -51,7 +47,7 @@ export class MinefieldService {
 
       minefield = this.updateCellById(id, {isMined: true}, minefield);
 
-      minesCount++;
+      minesPlaced++;
     }
 
     //
@@ -69,7 +65,7 @@ export class MinefieldService {
     return minefield;
   }
 
-  getCellById(id: CellModel['id'], minefield: MinefieldModel): CellModel {
+  getCellById(id: number, minefield: MinefieldModel): CellModel {
     const {row, column} = this.getCellCoordinatesById(id, minefield);
 
     return minefield[row][column];
@@ -94,6 +90,18 @@ export class MinefieldService {
     return minefield;
   }
 
+  countCellsBy(callback: (cell: CellModel) => boolean, minefield: MinefieldModel): number {
+    let count = 0;
+
+    minefield.forEach((row) => row.forEach((cell) => callback(cell) && count++));
+
+    return count;
+  }
+
+  updateCells(callback: (cell: CellModel) => Partial<CellModel>, minefield: MinefieldModel): MinefieldModel {
+    return minefield.map((row) => row.map((cell) => ({...cell, ...callback(cell)})));
+  }
+
   private getCellNeighbors(cell: CellModel, minefield: MinefieldModel): ReadonlyArray<CellModel> {
     const res: CellModel[] = [];
 
@@ -112,7 +120,7 @@ export class MinefieldService {
     return res;
   }
 
-  private getCellCoordinatesById(id: CellModel['id'], minefield: MinefieldModel): { row: number, column: number } {
+  private getCellCoordinatesById(id: number, minefield: MinefieldModel): { row: number, column: number } {
     for (let i = 0; i < minefield.length; i++) {
       const row = minefield[i];
 
@@ -128,11 +136,8 @@ export class MinefieldService {
     throw new Error(`Can't find cell with id [${id}]`);
   }
 
-  private updateCellById(id: CellModel['id'], cellToReplace: Partial<CellModel>, minefield: MinefieldModel): MinefieldModel {
+  private updateCellById(id: number, cellToReplace: Partial<CellModel>, minefield: MinefieldModel): MinefieldModel {
     return minefield.map(row => row.map((cell) => cell.id == id ? {...cell, ...cellToReplace} : cell));
   }
 
-  private updateCells(callback: (cell: CellModel) => Partial<CellModel>, minefield: MinefieldModel): MinefieldModel {
-    return minefield.map((row) => row.map((cell) => ({...cell, ...callback(cell)})));
-  }
 }

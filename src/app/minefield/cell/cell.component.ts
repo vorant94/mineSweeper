@@ -1,6 +1,6 @@
 import {Component, HostBinding, HostListener, Input} from '@angular/core';
 import {Store} from "@ngxs/store";
-import {OpenCell} from "../state/minefield.actions";
+import {DigCell} from "../state/minefield.actions";
 import {CellModel} from "../state/minefield.models";
 
 @Component({
@@ -28,6 +28,6 @@ export class CellComponent {
 
   @HostListener('click')
   private onClick(): void {
-    this.store.dispatch(new OpenCell(this.cell.id))
+    this.store.dispatch(new DigCell(this.cell.id))
   }
 }

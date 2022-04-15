@@ -1,9 +1,10 @@
 import {AppStateModel} from "./app.models";
 
+//
+// TODO how to avoid error here that is caused by sub-state stuff ??
+//
 export const DEFAULTS: AppStateModel = {
-  settings: {
-    rows: 10,
-    columns: 15,
-    minesCount: 10,
-  }
-};
+  gameState: 'init',
+  gameStartedTime: null,
+  gameEndedTime: null,
+} as AppStateModel;

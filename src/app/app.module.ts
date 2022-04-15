@@ -6,6 +6,11 @@ import {AppComponent} from './app.component';
 import {NgxsModule} from "@ngxs/store";
 import {AppState} from "./state/app.state";
 import {MinefieldModule} from "./minefield/minefield.module";
+import {SettingsModule} from "./settings/settings.module";
+import {SettingsState} from "./settings/state/settings.state";
+import {MinefieldState} from "./minefield/state/minefield.state";
+import {environment} from "../environments/environment";
+import {NgxsReduxDevtoolsPluginModule} from "@ngxs/devtools-plugin";
 
 @NgModule({
   declarations: [
@@ -14,8 +19,13 @@ import {MinefieldModule} from "./minefield/minefield.module";
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgxsModule.forRoot([AppState]),
-    MinefieldModule
+    NgxsModule.forRoot(
+      [AppState, SettingsState, MinefieldState],
+      {developmentMode: !environment.production}
+    ),
+    NgxsReduxDevtoolsPluginModule.forRoot(),
+    MinefieldModule,
+    SettingsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

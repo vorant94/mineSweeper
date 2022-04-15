@@ -1,9 +1,9 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import {Select, Store} from "@ngxs/store";
 import {Observable, Subscription} from "rxjs";
-import {OpenCell} from "../state/minefield.actions";
+import {DigCell} from "../state/minefield.actions";
 import {MinefieldState} from "../state/minefield.state";
-import {CellModel, MinefieldModel} from "../state/minefield.models";
+import {MinefieldModel, MinefieldStateModel} from "../state/minefield.models";
 
 @Component({
   selector: 'app-minefield',
@@ -11,12 +11,14 @@ import {CellModel, MinefieldModel} from "../state/minefield.models";
   styleUrls: ['./minefield.component.scss']
 })
 export class MinefieldComponent implements OnInit, OnDestroy {
-  @Select(MinefieldState.minefield) readonly minefield$!: Observable<MinefieldModel>;
+  @Select(MinefieldState) readonly state$!: Observable<MinefieldStateModel>;
+
+  @Select(MinefieldState.minefield) private readonly minefield$!: Observable<MinefieldModel>;
 
   private rows?: number;
   private columns?: number;
 
-  private readonly onDestroy$: Subscription = new Subscription();
+  private readonly onDestroySub$: Subscription = new Subscription();
 
   constructor(
     private readonly store: Store
@@ -24,14 +26,15 @@ export class MinefieldComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.minefield$.subscribe((minefield) => {
-      this.rows = minefield.length;
-      this.columns = minefield[0]?.length;
-    });
+    this.initMinefieldSizeAssignment();
   }
 
   ngOnDestroy() {
-    this.onDestroy$.unsubscribe();
+    this.onDestroySub$.unsubscribe();
+  }
+
+  digCell(id: number) {
+    this.store.dispatch(new DigCell(id));
   }
 
   @HostBinding('style.grid-template-rows')
@@ -44,7 +47,12 @@ export class MinefieldComponent implements OnInit, OnDestroy {
     return `repeat(${this.columns}, 1fr)`
   }
 
-  openCell(id: CellModel['id']) {
-    this.store.dispatch(new OpenCell(id));
+  private initMinefieldSizeAssignment() {
+    this.onDestroySub$.add(
+      this.minefield$.subscribe((minefield) => {
+        this.rows = minefield.length;
+        this.columns = minefield[0]?.length;
+      })
+    );
   }
 }

@@ -2,7 +2,7 @@
   <app-settings></app-settings>
 
   <div class="timer">
-    {{gameDurationInSeconds}}
+    {{gameDuration$ | async}}
   </div>
 </div>
 <app-minefield></app-minefield>

@@ -1,7 +1,5 @@
-export type MinefieldSettingsModel = Readonly<{
+export interface MinefieldSettingsModel {
   rows: number;
   columns: number;
   minesCount: number;
-}>
-
-export type DisableReason = 'game-over' | 'victory';
+}

@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {Action, Actions, NgxsOnInit, ofActionSuccessful, State, StateContext} from '@ngxs/store';
-import {EndTheGame, InitMinefield, StartTheGame} from './app.actions';
-import {AppStateModel} from "./app.models";
+import {EndGame, ResetGame, StartGame} from './app.actions';
+import {AppStateModel, END_GAME_TYPE_TO_MINEFIELD_DISABLE_TYPE} from "./app.models";
 import {DEFAULTS} from "./app.defaults";
 import {SettingsState} from "../settings/state/settings.state";
 import {MinefieldState} from "../minefield/state/minefield.state";
-import {DigCell, DisableMinefield, GenerateNewMinefield, RevealMinefield} from "../minefield/state/minefield.actions";
+import {DigCell, DisableMinefield, GenerateMinefield, RevealMinefield} from "../minefield/state/minefield.actions";
 import {SetSettings} from "../settings/state/settings.actions";
 import {MinefieldService} from "../minefield/state/minefield.service";
 
@@ -30,50 +30,45 @@ export class AppState implements NgxsOnInit {
     }
 
     const {settings} = ctx.getState();
-    ctx.dispatch(new GenerateNewMinefield(settings));
+    ctx.dispatch(new GenerateMinefield(settings));
 
     this.actions$.pipe(
       ofActionSuccessful(SetSettings)
-    ).subscribe(({settings}: SetSettings) => {
-      ctx.dispatch(new GenerateNewMinefield(settings))
-    });
+    ).subscribe(() => ctx.dispatch(new ResetGame()));
 
     this.actions$.pipe(
       ofActionSuccessful(DigCell)
     ).subscribe(({id}: DigCell) => {
       const {minefield: {minefield}, settings: {minesCount}, gameState} = ctx.getState();
-      let actions: any[] = [];
+      const actions: any[] = [];
 
       if (gameState == 'init') {
-        actions = [...actions, new StartTheGame()];
+        actions.push(new StartGame());
       }
 
       const cell = this.minefieldService.getCellById(id, minefield);
       if (cell.isMined) {
-        actions = [...actions, new EndTheGame('game-over')];
+        actions.push(new EndGame('loss'));
       }
 
-      const closedCellsCount = this.minefieldService.countCellsBy(
-        ({isOpened}) => !isOpened,
-        minefield
-      );
+      let closedCellsCount: number = 0;
+      for (const row of minefield) {
+        for (const cell of row) {
+          if (!cell.isOpened) {
+            closedCellsCount++
+          }
+        }
+      }
       if (closedCellsCount === minesCount) {
-        actions = [...actions, new EndTheGame('victory')];
+        actions.push(new EndGame('victory'));
       }
 
       ctx.dispatch(actions);
     });
   }
 
-  @Action(InitMinefield)
-  initMinefield(ctx: StateContext<AppStateModel>): void {
-    const state = ctx.getState();
-
-    ctx.dispatch(new GenerateNewMinefield(state.settings));
-  }
-
-  @Action(StartTheGame)
-  startTheGame(ctx: StateContext<AppStateModel>): void {
+  @Action(StartGame)
+  startGame(ctx: StateContext<AppStateModel>): void {
     ctx.patchState({
       gameStartedTime: new Date(),
       gameEndedTime: null,
@@ -81,16 +76,30 @@ export class AppState implements NgxsOnInit {
     });
   }
 
-  @Action(EndTheGame)
-  endTheGame(ctx: StateContext<AppStateModel>, {gameState}: EndTheGame): void {
+  @Action(EndGame)
+  endGame(ctx: StateContext<AppStateModel>, {type}: EndGame): void {
     ctx.patchState({
       gameEndedTime: new Date(),
-      gameState,
+      gameState: 'game-over',
     });
 
+    const disableType = END_GAME_TYPE_TO_MINEFIELD_DISABLE_TYPE[type];
+
     ctx.dispatch([
-      new DisableMinefield(gameState),
+      new DisableMinefield(disableType),
       new RevealMinefield()
     ]);
+  }
+
+  @Action(ResetGame)
+  resetGame(ctx: StateContext<AppStateModel>): void {
+    const {settings} = ctx.getState();
+    ctx.dispatch(new GenerateMinefield(settings));
+
+    ctx.patchState({
+      gameStartedTime: null,
+      gameEndedTime: null,
+      gameState: 'init'
+    });
   }
 }

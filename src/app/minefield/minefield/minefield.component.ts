@@ -1,7 +1,6 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
-import {Select, Store} from "@ngxs/store";
+import {Select} from "@ngxs/store";
 import {Observable, Subscription} from "rxjs";
-import {DigCell} from "../state/minefield.actions";
 import {MinefieldState} from "../state/minefield.state";
 import {MinefieldModel, MinefieldStateModel} from "../state/minefield.models";
 
@@ -20,21 +19,12 @@ export class MinefieldComponent implements OnInit, OnDestroy {
 
   private readonly onDestroySub$: Subscription = new Subscription();
 
-  constructor(
-    private readonly store: Store
-  ) {
-  }
-
   ngOnInit() {
     this.initMinefieldSizeAssignment();
   }
 
   ngOnDestroy() {
     this.onDestroySub$.unsubscribe();
-  }
-
-  digCell(id: number) {
-    this.store.dispatch(new DigCell(id));
   }
 
   @HostBinding('style.grid-template-rows')

@@ -1,25 +1,18 @@
-import {DisableReason} from "../shared/models";
+import {EndGameType} from "./app.models";
 
-export class InitMinefield {
-  static readonly type = '[App] Generate initial Minefield';
+export class StartGame {
+  static readonly type = '[App] Start Game';
 }
 
-export class StartTheGame {
-  static readonly type = '[App] Start the Game';
-}
-
-export class EndTheGame {
-  static readonly type = '[App] End the Game';
+export class EndGame {
+  static readonly type = '[App] End Game';
 
   constructor(
-    public readonly gameState: DisableReason
+    public readonly type: EndGameType,
   ) {
   }
 }
 
-export class DigCell {
-  static readonly type = '[App] Dig cell';
-
-  constructor(public readonly id: number) {
-  }
+export class ResetGame {
+  static readonly type = '[App] Reset Game';
 }

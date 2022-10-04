@@ -22,11 +22,11 @@
   align-items: center;
   justify-content: center;
 
-  &.victory {
+  &.lightgreen {
     background-color: lightgreen;
   }
 
-  &.game-over {
+  &.pink {
     background-color: pink;
   }
 }

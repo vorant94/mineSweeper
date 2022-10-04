@@ -1,63 +1,39 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {filter, Observable, Subscription, switchMap, timer} from "rxjs";
-import {Actions, ofActionSuccessful, Select} from "@ngxs/store";
+import {Component} from '@angular/core';
+import {distinctUntilChanged, map, Observable, switchMap, timer} from "rxjs";
+import {Select} from "@ngxs/store";
 import {AppState} from "./state/app.state";
 import {AppStateModel} from "./state/app.models";
-import {EndTheGame, StartTheGame} from "./state/app.actions";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
-
-  gameDurationInSeconds = 0;
+export class AppComponent {
+  readonly gameDuration$: Observable<number> = timer(0, 1000).pipe(
+    switchMap(() => this.state$),
+    map((state) => this.calculateGameDuration(state)),
+    distinctUntilChanged(),
+  );
 
   @Select(AppState) private readonly state$!: Observable<AppStateModel>;
 
-  private readonly gameDurationSub$: Subscription = new Subscription();
-  private readonly onDestroySub$: Subscription = new Subscription();
+  private calculateGameDuration({gameStartedTime, gameEndedTime}: AppStateModel): number {
+    if (!gameStartedTime && !gameEndedTime) {
+      return 0;
+    }
 
-  constructor(private readonly actions$: Actions) {
-  }
+    if (gameStartedTime && !gameEndedTime) {
+      const now = new Date();
+      const durationInMilliSeconds = now.getTime() - gameStartedTime.getTime();
+      return Math.round(durationInMilliSeconds / 1000);
+    }
 
-  ngOnInit() {
-    this.initGameDurationOnGameStart();
-    this.cleanupGameDurationOnGameEnd();
-  }
+    if (gameStartedTime && gameEndedTime) {
+      const durationInMilliSeconds = gameEndedTime.getTime() - gameStartedTime.getTime();
+      return Math.round(durationInMilliSeconds / 1000);
+    }
 
-  ngOnDestroy() {
-    this.onDestroySub$.unsubscribe();
-    this.gameDurationSub$.unsubscribe();
-  }
-
-  private initGameDurationOnGameStart() {
-    this.onDestroySub$.add(
-      this.actions$.pipe(
-        ofActionSuccessful(StartTheGame),
-      ).subscribe(() => this.initGameDurationCalculation())
-    );
-  }
-
-  private cleanupGameDurationOnGameEnd() {
-    this.onDestroySub$.add(
-      this.actions$.pipe(
-        ofActionSuccessful(EndTheGame)
-      ).subscribe(() => this.gameDurationSub$.unsubscribe())
-    );
-  }
-
-  private initGameDurationCalculation() {
-    this.gameDurationSub$.add(
-      timer(0, 1000).pipe(
-        switchMap(() => this.state$),
-        filter(({gameStartedTime}) => !!gameStartedTime)
-      ).subscribe(({gameStartedTime}) => {
-        const now = new Date();
-        const durationInMilliSeconds = now.getTime() - gameStartedTime!.getTime();
-        this.gameDurationInSeconds = Math.round(durationInMilliSeconds / 1000);
-      })
-    )
+    throw new Error(`Can't calculate game duration`);
   }
 }

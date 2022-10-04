@@ -6,6 +6,6 @@
 
   <div *ngIf="state.disabled"
        class="overlay"
-       [class.victory]="state.disableReason === 'victory'"
-       [class.game-over]="state.disableReason === 'game-over'"></div>
+       [class.lightgreen]="state.disableType === 'lightgreen'"
+       [class.pink]="state.disableType === 'pink'"></div>
 </ng-container>

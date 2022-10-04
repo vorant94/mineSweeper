@@ -1,7 +1,8 @@
-import {DisableReason, MinefieldSettingsModel} from "../../shared/models";
+import {MinefieldSettingsModel} from "../../shared/models";
+import {DisableType} from "./minefield.models";
 
-export class GenerateNewMinefield {
-  static readonly type = '[Minefield] Generate Minefield with Settings';
+export class GenerateMinefield {
+  static readonly type = '[Minefield] Generate Minefield';
 
   constructor(public readonly settings: MinefieldSettingsModel) {
   }
@@ -17,7 +18,7 @@ export class DigCell {
 export class DisableMinefield {
   static readonly type = '[Minefield] Disable Minefield';
 
-  constructor(public readonly disableReason: DisableReason) {
+  constructor(public readonly disableType: DisableType) {
   }
 }
 

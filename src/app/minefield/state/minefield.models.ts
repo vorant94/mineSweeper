@@ -1,16 +1,16 @@
-import {DisableReason} from "../../shared/models";
-
-export type MinefieldStateModel = Readonly<{
+export interface MinefieldStateModel {
   minefield: MinefieldModel;
   disabled: boolean;
-  disableReason: DisableReason | null;
-}>
+  disableType: DisableType | null;
+}
 
-export type MinefieldModel = ReadonlyArray<ReadonlyArray<CellModel>>;
+export type MinefieldModel = CellModel[][];
 
-export type CellModel = Readonly<{
+export interface CellModel {
   id: number;
   minesAroundCount: number | null;
   isOpened: boolean;
   isMined: boolean;
-}>
+}
+
+export type DisableType = 'pink' | 'lightgreen';

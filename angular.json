@@ -1,5 +1,8 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "cli": {
+    "analytics": "ab00cc8e-e409-4cd1-a276-d2898598cfdb"
+  },
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
@@ -37,6 +40,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/minesweeper/",
               "budgets": [
                 {
                   "type": "initial",

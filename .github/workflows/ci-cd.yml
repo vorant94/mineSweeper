@@ -1,5 +1,9 @@
 name: CI/CD
 
+permissions:
+  pages: write
+  id-token: write
+
 on:
   push:
     branches: [ master ]
